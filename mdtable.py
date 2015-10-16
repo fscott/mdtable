@@ -13,8 +13,9 @@ import subprocess
 import os
 import sys
 import re
-import optparse
+import argparse
 import platform
+#import csv
 
 def add_spaces(word, column_size):
     if len(word) > column_size:
@@ -84,21 +85,26 @@ def get_user_input(num_rows, num_columns):
         rtemp = rtemp + 1
     return mdtable
     
-usage = "usage: /.%prog [options] Makes a nice table capable of being rendered in Github Flavored Markdown from user input."
-parser = optparse.OptionParser(usage=usage)
+usage = "usage: /.%prog [options] Makes a nice table capable of being rendered in Github Flavored Markdown from user input. Either input the data at the prompts or use a csv file."
+parser = argparse.ArgumentParser(usage=usage)
 
-parser.add_option("-r", type="int", action="store", default=0, help="number of rows")
-parser.add_option("-c", type="int", action="store", default=0, help="number of columns")
-parser.add_option("-o", action="store", default="mdtable.md", help="name of output file(default: mdtable.md)")
-parser.add_option("-b", type="int", action="store", default=15, help="size of buffer (default: 15)")
+parser.add_argument("-r", action="store", type=int, default=0, help="number of rows")
+parser.add_argument("-c", action="store", type=int, default=0, help="number of columns")
+parser.add_argument("-o", action="store", default="mdtable.md", help="name of output file(default: mdtable.md)")
+parser.add_argument("-b", action="store", type=int,  default=15, help="size of buffer (default: 15)")
+#parser.add_argument("-i", action="store", default="", help="name of csv file to use")
 
-options, args = parser.parse_args()
+options = parser.parse_args()
 
 num_rows = options.r
 num_columns = options.c
+
 buff = options.b
 
 mdtable = []
+#if len(options.i) > 0:
+#    mdtable = 
+
 if num_rows == 0 or num_columns == 0: 
     mdtable = get_user_prefs()
 elif num_rows > 0 and num_columns > 0:
@@ -111,5 +117,8 @@ send_table_out(mdtable, out)
 if 'CYGWIN' in platform.system():
     print 'use cygstart'
 if 'Darwin' in platform.system():
-   data = subprocess.check_output(["mate",out])
-    
+    try:
+       data = subprocess.check_output(["mate",out])
+    except:
+        data = subprocess.check_output(["open", "-a", "TextEdit", out])
+ 
