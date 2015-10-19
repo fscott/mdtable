@@ -85,13 +85,13 @@ def get_user_input(num_rows, num_columns):
         rtemp = rtemp + 1
     return mdtable
     
-usage = "usage: /.%prog [options] Makes a nice table capable of being rendered in Github Flavored Markdown from user input. Either input the data at the prompts or use a csv file."
+usage = "usage: /.%(prog)s [options] Makes a nice table capable of being rendered in Github Flavored Markdown from user input. Either input the data at the prompts or use a csv file."
 parser = argparse.ArgumentParser(usage=usage)
 
 parser.add_argument("-r", action="store", type=int, default=0, help="number of rows")
 parser.add_argument("-c", action="store", type=int, default=0, help="number of columns")
 parser.add_argument("-o", action="store", default="mdtable.md", help="name of output file(default: mdtable.md)")
-parser.add_argument("-b", action="store", type=int,  default=15, help="size of buffer (default: 15)")
+parser.add_argument("-b", action="store", type=int,  default=15, help="size of buffer (default: %(default)s)")
 #parser.add_argument("-i", action="store", default="", help="name of csv file to use")
 
 options = parser.parse_args()
