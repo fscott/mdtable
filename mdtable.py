@@ -15,7 +15,7 @@ import sys
 import re
 import argparse
 import platform
-#import csv
+import csv
 
 def add_spaces(word, column_size):
     if len(word) > column_size:
@@ -64,27 +64,38 @@ def get_user_prefs():
     mdtable = get_user_input(num_rows, num_columns)
     return mdtable
 
+def add_header(mdtable):
+    headrow = []
+    curr = 0
+    while curr < len(mdtable[0]):
+        headrow.append('---')
+        curr += 1
+    mdtable.insert(1,headrow)        
+    return mdtable
+
 def get_user_input(num_rows, num_columns):
     rtemp = 0
     ctemp = 0
-
+    mdtable = []
     while rtemp < num_rows:
         row = []
         ctemp = 0
-        while ctemp < num_columns:
-            if rtemp == 1 and ctemp == 0:
-                while ctemp < num_columns:
-                    row.append('---')
-                    ctemp +=1
-                mdtable.append(row)
-                row = []
-                ctemp = 0  
+        while ctemp < num_columns: 
             row.append(raw_input('Row %i, Column %i: ' % (rtemp + 1, ctemp + 1)))
             ctemp += 1
         mdtable.append(row)
         rtemp = rtemp + 1
     return mdtable
-    
+
+def get_data_from_csv(file):
+    temptable = []
+    with open (file,'r') as f:
+        freader = csv.reader(f, delimiter=',')
+        for row in freader:
+            temptable.append(row)
+            print row
+    return temptable
+   
 usage = "usage: /.%(prog)s [options] Makes a nice table capable of being rendered in Github Flavored Markdown from user input. Either input the data at the prompts or use a csv file."
 parser = argparse.ArgumentParser(usage=usage)
 
@@ -92,33 +103,41 @@ parser.add_argument("-r", action="store", type=int, default=0, help="number of r
 parser.add_argument("-c", action="store", type=int, default=0, help="number of columns")
 parser.add_argument("-o", action="store", default="mdtable.md", help="name of output file(default: mdtable.md)")
 parser.add_argument("-b", action="store", type=int,  default=15, help="size of buffer (default: %(default)s)")
-#parser.add_argument("-i", action="store", default="", help="name of csv file to use")
+parser.add_argument("-f", action="store", default="", help="name of csv file to use")
 
 options = parser.parse_args()
 
 num_rows = options.r
 num_columns = options.c
-
 buff = options.b
+file = options.f
 
-mdtable = []
-#if len(options.i) > 0:
-#    mdtable = 
+def main():    
 
-if num_rows == 0 or num_columns == 0: 
-    mdtable = get_user_prefs()
-elif num_rows > 0 and num_columns > 0:
-    mdtable = get_user_input(num_rows, num_columns)
-mdtable = load_table(mdtable)
+    mdtable = []
+    #if len(options.i) > 0:
+    #    mdtable = 
+    if len(file) > 0:
+        mdtable = get_data_from_csv(file)
+    elif num_rows == 0 or num_columns == 0: 
+        mdtable = get_user_prefs()
+    elif num_rows > 0 and num_columns > 0:
+        mdtable = get_user_input(num_rows, num_columns)
+    mdtable = add_header(mdtable)
+    mdtable = load_table(mdtable)
+            
+    out = options.o
+    send_table_out(mdtable, out)
+    
+    if 'CYGWIN' in platform.system():
+        print 'use cygstart'
+    if 'Darwin' in platform.system():
+        try:
+           data = subprocess.check_output(["mate",out])
+        except:
+            data = subprocess.check_output(["open", "-a", "TextEdit", out])
         
-out = options.o
-send_table_out(mdtable, out)
 
-if 'CYGWIN' in platform.system():
-    print 'use cygstart'
-if 'Darwin' in platform.system():
-    try:
-       data = subprocess.check_output(["mate",out])
-    except:
-        data = subprocess.check_output(["open", "-a", "TextEdit", out])
+if __name__ == "__main__":
+    main()
  
